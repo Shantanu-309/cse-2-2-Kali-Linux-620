@@ -1,0 +1,48 @@
+#!/bin/bash
+
+TARGET=$1
+
+if [ -z "$TARGET" ]; then
+  echo "Usage: ./display-osint-lite.sh domain.com"
+  exit 1
+fi
+
+echo ""
+echo "======================================"
+echo " OSINT Intelligence Display (LITE) for $TARGET"
+echo "======================================"
+echo ""
+
+# ==============================
+# DOMAIN INFO (REDUCED)
+# ==============================
+echo "===== DOMAIN INFO ====="
+whois $TARGET 2>/dev/null | \
+grep -E "Domain Name|Registrar|Creation Date|Expiry Date" | \
+head -n 6
+echo ""
+
+# ==============================
+# SUBDOMAINS (FAST LIMIT)
+# ==============================
+echo "===== SUBDOMAINS ====="
+subfinder -d $TARGET 2>/dev/null | head -n 8
+echo ""
+
+# ==============================
+# EMAILS (LIGHT QUERY)
+# ==============================
+echo "===== EMAILS ====="
+theharvester -d $TARGET -b google -l 25 2>/dev/null | \
+grep "@" | sort -u | head -n 10
+echo ""
+
+# ==============================
+# TECH STACK (BRIEF)
+# ==============================
+echo "===== TECH STACK ====="
+whatweb $TARGET --log-brief=/tmp/whatweb-lite.txt > /dev/null
+head -n 1 /tmp/whatweb-lite.txt
+echo ""
+
+echo "========== LITE SCAN COMPLETE =========="
